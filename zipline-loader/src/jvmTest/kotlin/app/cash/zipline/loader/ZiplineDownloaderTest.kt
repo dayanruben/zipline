@@ -26,6 +26,8 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import okio.Path.Companion.toPath
 import okio.fakefilesystem.FakeFileSystem
 import org.junit.After
@@ -76,6 +78,36 @@ class ZiplineDownloaderTest {
       bravoFilePath to testFixturesJvm.bravoByteString
     )
     downloader.download(manifestPath)
+
+    // check that files have been downloaded to downloadDir as expected
+    assertTrue(fileSystem.exists(downloadDir / PREBUILT_MANIFEST_FILE_NAME))
+    assertEquals(
+      testFixturesJvm.manifestByteString,
+      fileSystem.read(downloadDir / PREBUILT_MANIFEST_FILE_NAME) { readByteString() })
+    assertTrue(fileSystem.exists(downloadDir / testFixturesJvm.alphaSha256Hex))
+    assertEquals(
+      testFixturesJvm.alphaByteString,
+      fileSystem.read(downloadDir / testFixturesJvm.alphaSha256Hex) { readByteString() })
+    assertTrue(fileSystem.exists(downloadDir / testFixturesJvm.bravoSha256Hex))
+    assertEquals(
+      testFixturesJvm.bravoByteString,
+      fileSystem.read(downloadDir / testFixturesJvm.bravoSha256Hex) { readByteString() })
+  }
+
+  @Test
+  fun integrationTest(): Unit = runBlocking(dispatcher) {
+    assertFalse(fileSystem.exists(downloadDir / PREBUILT_MANIFEST_FILE_NAME))
+    assertFalse(fileSystem.exists(downloadDir / testFixturesJvm.alphaSha256Hex))
+    assertFalse(fileSystem.exists(downloadDir / testFixturesJvm.bravoSha256Hex))
+
+    val baseUrl = "http://10.0.2.2:8080/".toHttpUrl()
+    downloader = ZiplineDownloader(
+      dispatcher = dispatcher,
+      httpClient = OkHttpZiplineHttpClient(baseUrl, OkHttpClient()),
+      downloadDir = downloadDir,
+      downloadFileSystem = fileSystem,
+    )
+    downloader.download("https://treelot.sqprod.co/latest/treehouse-activity/manifest.zipline.json")
 
     // check that files have been downloaded to downloadDir as expected
     assertTrue(fileSystem.exists(downloadDir / PREBUILT_MANIFEST_FILE_NAME))

@@ -66,6 +66,9 @@ class ZiplineDownloader(
     val manifestByteString = concurrentDownloadsSemaphore.withPermit {
       httpClient.download(manifestUrl)
     }
+
+    // We have to manually pass in the serializer here to let ZiplineDownloader be used in Zipline-CLI
+    //  because GraalVM doesn't support the reflection for the more magic extension function.
     return Json.decodeFromString(ZiplineManifest.serializer(), manifestByteString.utf8())
   }
 
