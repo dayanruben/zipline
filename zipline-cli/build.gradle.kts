@@ -35,6 +35,8 @@ dependencies {
 
   testImplementation(Dependencies.junit)
   testImplementation(Dependencies.kotlinTest)
+  testImplementation(Dependencies.okio)
+  testImplementation(Dependencies.okHttpMockWebServer)
 }
 
 tasks.shadowJar {
