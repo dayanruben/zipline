@@ -20,6 +20,7 @@ import app.cash.zipline.loader.testing.LoaderTestFixtures.Companion.alphaFilePat
 import app.cash.zipline.loader.testing.LoaderTestFixtures.Companion.bravoFilePath
 import app.cash.zipline.loader.testing.LoaderTestFixtures.Companion.manifestPath
 import app.cash.zipline.loader.ZiplineDownloader.Companion.PREBUILT_MANIFEST_FILE_NAME
+import app.cash.zipline.loader.testing.LoaderTestFixtures
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -40,17 +41,17 @@ class ZiplineDownloaderTest {
   private val fileSystem = FakeFileSystem()
   private val downloadDir = "/zipline/download".toPath()
   private lateinit var quickJs: QuickJs
-  private lateinit var testFixturesJvm: TestFixturesJvm
+  private lateinit var testFixtures: LoaderTestFixtures
   private lateinit var downloader: ZiplineDownloader
 
-  private fun alphaBytecode(quickJs: QuickJs) = testFixturesJvm.alphaByteString
-  private fun bravoBytecode(quickJs: QuickJs) = testFixturesJvm.bravoByteString
-  private fun manifest(quickJs: QuickJs) = testFixturesJvm.manifest
+  private fun alphaBytecode(quickJs: QuickJs) = testFixtures.alphaByteString
+  private fun bravoBytecode(quickJs: QuickJs) = testFixtures.bravoByteString
+  private fun manifest(quickJs: QuickJs) = testFixtures.manifest
 
   @Before
   fun setUp() {
     quickJs = QuickJs.create()
-    testFixturesJvm = TestFixturesJvm(quickJs)
+    testFixtures = LoaderTestFixtures(quickJs)
     downloader = ZiplineDownloader(
       dispatcher = dispatcher,
       httpClient = httpClient,
@@ -67,28 +68,28 @@ class ZiplineDownloaderTest {
   @Test
   fun downloadToDirectory(): Unit = runBlocking(dispatcher) {
     assertFalse(fileSystem.exists(downloadDir / PREBUILT_MANIFEST_FILE_NAME))
-    assertFalse(fileSystem.exists(downloadDir / testFixturesJvm.alphaSha256Hex))
-    assertFalse(fileSystem.exists(downloadDir / testFixturesJvm.bravoSha256Hex))
+    assertFalse(fileSystem.exists(downloadDir / testFixtures.alphaSha256Hex))
+    assertFalse(fileSystem.exists(downloadDir / testFixtures.bravoSha256Hex))
 
     httpClient.filePathToByteString = mapOf(
-      manifestPath to testFixturesJvm.manifestByteString,
-      alphaFilePath to testFixturesJvm.alphaByteString,
-      bravoFilePath to testFixturesJvm.bravoByteString
+      manifestPath to testFixtures.manifestByteString,
+      alphaFilePath to testFixtures.alphaByteString,
+      bravoFilePath to testFixtures.bravoByteString
     )
     downloader.download(manifestPath)
 
     // check that files have been downloaded to downloadDir as expected
     assertTrue(fileSystem.exists(downloadDir / PREBUILT_MANIFEST_FILE_NAME))
     assertEquals(
-      testFixturesJvm.manifestByteString,
+      testFixtures.manifestByteString,
       fileSystem.read(downloadDir / PREBUILT_MANIFEST_FILE_NAME) { readByteString() })
-    assertTrue(fileSystem.exists(downloadDir / testFixturesJvm.alphaSha256Hex))
+    assertTrue(fileSystem.exists(downloadDir / testFixtures.alphaSha256Hex))
     assertEquals(
-      testFixturesJvm.alphaByteString,
-      fileSystem.read(downloadDir / testFixturesJvm.alphaSha256Hex) { readByteString() })
-    assertTrue(fileSystem.exists(downloadDir / testFixturesJvm.bravoSha256Hex))
+      testFixtures.alphaByteString,
+      fileSystem.read(downloadDir / testFixtures.alphaSha256Hex) { readByteString() })
+    assertTrue(fileSystem.exists(downloadDir / testFixtures.bravoSha256Hex))
     assertEquals(
-      testFixturesJvm.bravoByteString,
-      fileSystem.read(downloadDir / testFixturesJvm.bravoSha256Hex) { readByteString() })
+      testFixtures.bravoByteString,
+      fileSystem.read(downloadDir / testFixtures.bravoSha256Hex) { readByteString() })
   }
 }

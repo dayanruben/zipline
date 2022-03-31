@@ -19,6 +19,7 @@ package app.cash.zipline.loader
 import app.cash.zipline.QuickJs
 import app.cash.zipline.loader.fetcher.Fetcher
 import app.cash.zipline.loader.receiver.Receiver
+import app.cash.zipline.loader.testing.LoaderTestFixtures
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -31,7 +32,7 @@ import org.junit.Test
 class ZiplineModuleLoaderTest {
   private val dispatcher = TestCoroutineDispatcher()
   private lateinit var quickJs: QuickJs
-  private lateinit var testFixturesJvm: TestFixturesJvm
+  private lateinit var testFixtures: LoaderTestFixtures
 
   private var alphaFetcherIds: MutableList<String> = mutableListOf()
   private var bravoFetcherIds: MutableList<String> = mutableListOf()
@@ -72,7 +73,7 @@ class ZiplineModuleLoaderTest {
     bravoFetcherIds.clear()
     alphaReceiverIds.clear()
     quickJs = QuickJs.create()
-    testFixturesJvm = TestFixturesJvm(quickJs)
+    testFixtures = LoaderTestFixtures(quickJs)
     bravoByteString = "test".encodeUtf8()
   }
 
@@ -83,7 +84,7 @@ class ZiplineModuleLoaderTest {
 
   @Test
   fun moduleLoaderRunsInterceptorsInOrder(): Unit = runBlocking {
-    moduleLoader.load(testFixturesJvm.manifest)
+    moduleLoader.load(testFixtures.manifest)
 
     // Both fetcher interceptors have been called, which means that alpha ran first and returned null
     // Receiver ran and alpha ran before bravo
