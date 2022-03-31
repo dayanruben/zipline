@@ -15,10 +15,14 @@
  */
 package app.cash.zipline.cli
 
+import app.cash.zipline.QuickJs
+import app.cash.zipline.loader.ZiplineDownloader.Companion.PREBUILT_MANIFEST_FILE_NAME
 import app.cash.zipline.loader.ZiplineManifest
 import app.cash.zipline.loader.ZiplineModule
+import app.cash.zipline.loader.testing.LoaderTestFixtures
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
@@ -26,6 +30,8 @@ import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
 import okio.FileSystem
 import okio.Path.Companion.toPath
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import picocli.CommandLine
 import picocli.CommandLine.MissingParameterException
@@ -33,6 +39,19 @@ import picocli.CommandLine.MissingParameterException
 class DownloadTest {
   private val webServer = MockWebServer()
   private val fileSystem = FileSystem.SYSTEM
+  private lateinit var quickJs: QuickJs
+  private lateinit var testFixtures: LoaderTestFixtures
+
+  @Before
+  fun setUp() {
+    quickJs = QuickJs.create()
+    testFixtures = LoaderTestFixtures(quickJs)
+  }
+
+  @After
+  fun tearDown() {
+    quickJs.close()
+  }
 
   @Test fun downloadWithParameters() {
     fromArgs("-M", "test.cash.app", "-D", "/tmp/zipline/download")
@@ -65,7 +84,7 @@ class DownloadTest {
       modules = mapOf(
         "id" to ZiplineModule(
           url = webServer.url("/latest/app/alpha.zipline").toString(),
-          sha256 = pluginTestFixturesJvm.alphaSha256,
+          sha256 = testFixtures.alphaSha256,
           dependsOnIds = listOf(),
           patchFrom = null,
           patchUrl = null,
@@ -85,16 +104,18 @@ class DownloadTest {
     webServer.enqueue(
       MockResponse()
         .setResponseCode(200)
-        .setBody(Buffer().write(pluginTestFixturesJvm.alphaByteString))
+        .setBody(Buffer().write(testFixtures.alphaByteString))
     )
 
     val manifestUrl = webServer.url("/latest/app/manifest.zipline.json").toString()
 
+    // Download using the CLI
+    CommandLine(Download()).execute("-D", "/tmp/zipline/download", "-M", manifestUrl)
 
-
-
-    CommandLine(Download()).execute("-D", "/tmp/zipline/download", "-M", "test.cash.app")
-
+    // Check that files were downloaded
+    assertTrue(fileSystem.exists(downloadDirPath))
+    assertTrue(fileSystem.exists(downloadDirPath / PREBUILT_MANIFEST_FILE_NAME))
+    assertTrue(fileSystem.exists(downloadDirPath / testFixtures.alphaSha256Hex))
   }
 
   companion object {
