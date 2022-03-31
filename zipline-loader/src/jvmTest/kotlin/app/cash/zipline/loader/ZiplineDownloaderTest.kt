@@ -16,9 +16,9 @@
 package app.cash.zipline.loader
 
 import app.cash.zipline.QuickJs
-import app.cash.zipline.loader.TestFixturesJvm.Companion.alphaFilePath
-import app.cash.zipline.loader.TestFixturesJvm.Companion.bravoFilePath
-import app.cash.zipline.loader.TestFixturesJvm.Companion.manifestPath
+import app.cash.zipline.loader.testing.LoaderTestFixtures.Companion.alphaFilePath
+import app.cash.zipline.loader.testing.LoaderTestFixtures.Companion.bravoFilePath
+import app.cash.zipline.loader.testing.LoaderTestFixtures.Companion.manifestPath
 import app.cash.zipline.loader.ZiplineDownloader.Companion.PREBUILT_MANIFEST_FILE_NAME
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

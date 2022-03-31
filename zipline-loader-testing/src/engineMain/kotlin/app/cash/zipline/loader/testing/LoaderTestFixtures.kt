@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package app.cash.zipline.gradle
+package app.cash.zipline.loader.testing
 
 import app.cash.zipline.QuickJs
 import app.cash.zipline.loader.CURRENT_ZIPLINE_VERSION
@@ -28,7 +28,7 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 
-class PluginTestFixturesJvm(quickJs: QuickJs) {
+class LoaderTestFixtures(quickJs: QuickJs) {
   val alphaJs = """
       |globalThis.log = globalThis.log || "";
       |globalThis.log += "alpha loaded\n"
