@@ -11,12 +11,12 @@ plugins {
 kotlin {
   jvm()
 
-  js {
-    browser()
-    // TODO upstream this to ZiplinePlugin
-    binaries.library()
-    binaries.executable()
-  }
+  // js {
+  //   browser()
+  //   // TODO upstream this to ZiplinePlugin
+  //   binaries.library()
+  //   binaries.executable()
+  // }
 
   linuxX64()
   macosX64()
@@ -63,15 +63,6 @@ kotlin {
         target.disambiguationClassifier.orEmpty().capitalize() +
         compilationName.capitalize()
       project.dependencies.add(pluginConfigurationName, pluginDependency)
-    }
-  }
-}
-
-// TODO upstream this to ZiplinePlugin
-tasks {
-  withType(KotlinJsCompile::class.java).all {
-    kotlinOptions {
-      freeCompilerArgs += listOf("-Xir-per-module")
     }
   }
 }
