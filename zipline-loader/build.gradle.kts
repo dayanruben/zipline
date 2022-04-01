@@ -79,11 +79,13 @@ kotlin {
     }
     val engineTest by creating {
       dependsOn(commonTest)
+      dependencies {
+        implementation(projects.ziplineLoaderTesting)
+      }
     }
     val jniTest by creating {
       dependsOn(engineTest)
       dependencies {
-        implementation(projects.ziplineLoaderTesting)
         implementation(Dependencies.junit)
         implementation(Dependencies.kotlinxCoroutinesTest)
         implementation(Dependencies.okioFakeFileSystem)
